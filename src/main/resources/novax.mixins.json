@@ -1,0 +1,12 @@
+{
+  "compatibilityLevel": "JAVA_8",
+  "package": "at.d23c.novax.mixins",
+  "mixins": [
+    "accessor.RenderManagerAccessMixin"
+  ],
+  "client": [
+    "MinecraftMixin",
+    "GuiMixin",
+    "GuiPlayerMixin"
+  ]
+}

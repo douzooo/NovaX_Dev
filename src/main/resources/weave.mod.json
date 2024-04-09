@@ -1,0 +1,8 @@
+{
+  "mixinConfigs": [
+    "novax.mixins.json"
+  ],
+  "entrypoints": [
+    "at.d23c.novax.NovaXMod"
+  ]
+}
