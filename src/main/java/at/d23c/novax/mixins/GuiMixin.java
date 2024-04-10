@@ -10,15 +10,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Mixin(GuiIngame.class)
-public class GuiMixin {
+@Mixin({ GuiIngame.class })
+public final class GuiMixin {
 
 
-    @Inject(method = "renderGameOverlay", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GlStateManager;color(FFFF)V", ordinal = 2))
-    public void renderGameOverlay(float var1, CallbackInfo ci) {
-System.out.println("Triggering Render Event");
-
+    @Inject(method = { "renderGameOverlay" }, at = { @At("HEAD") })
+    public final void rgoInject(float partialTicks, CallbackInfo ci) {
+        System.out.println((Object)"renderGameOverlay print");
     }
-
 
 }

@@ -27,14 +27,14 @@ repositories {
 }
 
 dependencies {
-    implementation(files("./libs/LegacyEvents-1.0.jar"))
+//    implementation(files("./libs/LegacyEvents-1.0.jar"))
     implementation("net.weavemc.api:common:1.0.0-PRE")
     implementation("net.weavemc:internals:1.0.0-PRE")
     compileOnly("org.spongepowered:mixin:0.8.5")
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(8)
 }
 
 tasks.test {
