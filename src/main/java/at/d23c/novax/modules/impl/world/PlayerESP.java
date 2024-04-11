@@ -1,22 +1,25 @@
 package at.d23c.novax.modules.impl.world;
-
+import at.d23c.novax.events.ClientTickEvent;
 import at.d23c.novax.events.RenderEntityEvent;
 import at.d23c.novax.mixins.accessor.RenderManagerAccessMixin;
 import at.d23c.novax.modules.Module;
 import at.d23c.novax.modules.ModuleCategory;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-
+import net.minecraft.entity.player.EntityPlayer;
 import net.weavemc.api.event.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
-
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.UUID;
 
 public class PlayerESP extends Module {
+
+    public ArrayList<UUID> renderForUuids = new ArrayList<>();
+
     public PlayerESP(String moduleName, ModuleCategory moduleCategory) {
         super(moduleName, moduleCategory);
     }
@@ -30,39 +33,98 @@ public class PlayerESP extends Module {
     public void onDisable() {
     }
 
+
+    @SubscribeEvent
+    public void onClientTick(ClientTickEvent event){
+        Minecraft.getMinecraft().theWorld.getLoadedEntityList().forEach((e) -> {
+            if(e instanceof EntityPlayer){
+                if(!renderForUuids.contains(e.getUniqueID())){
+                    renderForUuids.add(e.getUniqueID());
+                }
+            }
+        });
+    }
+
+
     @SubscribeEvent
     public void onRenderWorldLast(RenderEntityEvent event) {
-        Minecraft mc = Minecraft.getMinecraft();
-        if (mc.theWorld == null || mc.getRenderManager() == null || ((RenderManagerAccessMixin)mc.getRenderManager()).renderPosX() == 0 || ((RenderManagerAccessMixin)mc.getRenderManager()).renderPosY() == 0 || ((RenderManagerAccessMixin)mc.getRenderManager()).renderPosZ() == 0)
-            return;
+        if(renderForUuids.contains(event.entity.getUniqueID())){
+            RenderManagerAccessMixin rm = ((RenderManagerAccessMixin) Minecraft.getMinecraft().getRenderManager());
 
-        double x = event.entity.lastTickPosX + (event.entity.posX - event.entity.lastTickPosX) * (double) event.tick - ((RenderManagerAccessMixin)mc.getRenderManager()).renderPosX();
-        double y = event.entity.lastTickPosY + (event.entity.posY - event.entity.lastTickPosY) * (double) event.tick - ((RenderManagerAccessMixin)mc.getRenderManager()).renderPosY();
-        double z = event.entity.lastTickPosZ + (event.entity.posZ - event.entity.lastTickPosZ) * (double) event.tick - ((RenderManagerAccessMixin)mc.getRenderManager()).renderPosZ();
+            Minecraft mc = Minecraft.getMinecraft();
+            if (mc.theWorld == null || mc.getRenderManager() == null || rm.renderPosX() == 0 || rm.renderPosY() == 0 || rm.renderPosZ() == 0)
+                return;
 
-        GlStateManager.pushMatrix();
+            System.out.println("Tick Render Player event.entity");
 
-        GlStateManager.popMatrix();
-        GlStateManager.pushMatrix();
-        GL11.glTranslated(x, y, z);
-        GlStateManager.disableTexture2D();
-        GlStateManager.enableBlend();
-        GlStateManager.disableAlpha();
-        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GlStateManager.color(1.0F, 0.0F, 0.0F, 0.5F); // R,G,B,Alpha
-        Tessellator tessellator = Tessellator.getInstance();
-        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
-        worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
-        worldRenderer.pos(-0.5, -0.5, 0.0).endVertex(); // Bottom-left
-        worldRenderer.pos(0.5, -0.5, 0.0).endVertex();  // Bottom-right
-        worldRenderer.pos(0.5, 0.5, 0.0).endVertex();   // Top-right
-        worldRenderer.pos(-0.5, 0.5, 0.0).endVertex();  // Top-left
-        tessellator.draw();
-        GlStateManager.enableAlpha();
-        GlStateManager.disableBlend();
-        GlStateManager.enableTexture2D();
-        GlStateManager.popMatrix();
+
+            if (event.entity instanceof EntityPlayer) {
+                double x = event.entity.lastTickPosX + (event.entity.posX - event.entity.lastTickPosX) * (double) event.tick - rm.renderPosX();
+                double y = event.entity.lastTickPosY + (event.entity.posY - event.entity.lastTickPosY) * (double) event.tick - rm.renderPosY();
+                double z = event.entity.lastTickPosZ + (event.entity.posZ - event.entity.lastTickPosZ) * (double) event.tick - rm.renderPosZ();
+                float d = (float) 0 / 40.0F; // Expand
+
+
+                GlStateManager.pushMatrix();
+                if (true) {
+                    GL11.glTranslated(x, y - 0.2D, z);
+                    GL11.glRotated(-mc.getRenderManager().playerViewY, 0.0D, 1.0D, 0.0D);
+                    GlStateManager.disableDepth();
+                    GL11.glScalef(0.03F + d, 0.03F + d, 0.03F + d);
+                    int outline = rainbowDraw(2L,1L);
+                    float lineWidth = 1;
+
+
+                    mc.getRenderManager().doRenderEntity(event.entity,event.x, event.y,event.z,event.yaw,event.tick,true);
+
+
+
+                    drawLine(-20, 0, 0, -20, 75, 0, outline, lineWidth); // UL - OL
+                    drawLine(20, 0, 0, 20, 75, 0, outline, lineWidth); // UR - OR
+
+                    drawLine(-20, 0, 0, 20, 0, 0, outline, lineWidth); // UL - UR
+                    drawLine(-20, 75, 0, 20, 75, 0, outline, lineWidth); // OL - OR
+
+
+                    GlStateManager.enableDepth();
+                }
+                GlStateManager.popMatrix();
+            }
+        }
+
     }
+
+
+
+    public static void drawLine(double x1, double y1, double z1, double x2, double y2, double z2, int color, float lineWidth) {
+        GL11.glPushMatrix();
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        GL11.glLineWidth(lineWidth);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
+
+        // Save the current color settings
+        GL11.glPushAttrib(GL11.GL_CURRENT_BIT);
+        // Set the line color
+        GL11.glColor4ub((byte) (color >> 16 & 0xFF), (byte) (color >> 8 & 0xFF), (byte) (color & 0xFF), (byte) (color >> 24 & 0xFF));
+
+        GL11.glBegin(GL11.GL_LINES);
+        GL11.glVertex3d(x1, y1, z1);
+        GL11.glVertex3d(x2, y2, z2);
+        GL11.glEnd();
+
+        // Restore the previous color settings
+        GL11.glPopAttrib();
+
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+        GL11.glPopMatrix();
+    }
+
 
 
     public static int rainbowDraw(long speed, long... delay) {

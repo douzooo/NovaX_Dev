@@ -4,9 +4,8 @@
   "mixins": [
     "accessor.RenderManagerAccessMixin",
     "MinecraftMixin",
-    "GuiMixin",
     "RendererLivingEntityMixin",
-    "GuiIngameMixin2",
+    "GuiIngameMixin",
     "EntityRendererMixin",
     "accessor.MinecraftAccessMixin"
   ]
