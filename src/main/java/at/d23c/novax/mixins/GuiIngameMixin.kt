@@ -8,8 +8,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 
 @Mixin(GuiIngame::class)
 class GuiIngameMixin {
+
     @Inject(method = ["renderGameOverlay"], at = [At(value = "HEAD")])
     fun rgoInject(partialTicks: Float, ci: CallbackInfo) {
         println("renderGameOverlay print")
     }
+
 }

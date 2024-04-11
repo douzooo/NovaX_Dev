@@ -1,13 +1,13 @@
 plugins {
     kotlin("jvm") version "1.9.23"
-    id("net.weavemc.gradle") version "1.0.0-PRE"
+    id("net.weavemc.gradle") version "1.0.0-PRE2"
 
 }
 
 group = "at.d23c.novax"
 version = "1.0-SNAPSHOT"
 
-minecraft {
+weave {
     configure {
         name = "NovaX"
         modId = "novax"
@@ -22,14 +22,14 @@ minecraft {
 repositories {
     maven("https://jitpack.io")
     mavenCentral()
-    maven("https://repo.spongepowered.org/maven")
     maven("https://repo.weavemc.dev/releases")
+    maven("https://repo.spongepowered.org/maven")
 }
 
 dependencies {
 //    implementation(files("./libs/LegacyEvents-1.0.jar"))
-    implementation("net.weavemc.api:common:1.0.0-PRE")
-    implementation("net.weavemc:internals:1.0.0-PRE")
+    implementation("net.weavemc.api:common:1.0.0-PRE2")
+    implementation("net.weavemc:internals:1.0.0-PRE2")
     compileOnly("org.spongepowered:mixin:0.8.5")
 }
 

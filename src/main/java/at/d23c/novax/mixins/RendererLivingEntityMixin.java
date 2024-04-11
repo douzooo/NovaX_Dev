@@ -18,8 +18,6 @@ public class RendererLivingEntityMixin {
 
     @Inject(method = "doRender(Lnet/minecraft/entity/EntityLivingBase;DDDFF)V", at = @At("RETURN"))
     public void renderGameOverlay(EntityLivingBase entity, double x, double y, double z, float yaw, float tick, CallbackInfo ci) {
-        System.out.println("RenderLivingEntity");
-
         EventBus.postEvent(new RenderEntityEvent(entity, x, y, z,yaw,tick));
     }
 
